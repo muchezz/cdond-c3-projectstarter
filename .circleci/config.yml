@@ -3,6 +3,69 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.4.4
 
+commands:
+  slack_notify:
+    parameters:
+      id: 
+        type: string
+    channel:
+      default: $SLACK_DEFAULT_CHANNEL
+    steps:
+      - slack/notify:
+          event: fail
+          custom: |
+            {
+              "text": "CircleCI job has Failed!",              
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Job Successful. :tada:",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Env*: << parameters.env >>"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Job*: ${CIRCLE_JOB}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project*: $CIRCLE_PROJECT_REPONAME"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch*: $CIRCLE_BRANCH"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
 
 jobs:
   build-frontend:
@@ -20,14 +83,13 @@ jobs:
             # npm run build
             exit 1
             
+            
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
 
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
+      - slack_notify
+          
 
 
   build-backend:
@@ -48,10 +110,8 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
+      - slack_notify:
+          
 
 
   test-frontend:
