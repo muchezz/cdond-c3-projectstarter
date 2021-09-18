@@ -36,6 +36,8 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+
+
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -43,8 +45,8 @@ jobs:
       # Checkout code from git
       - checkout
       # Restore from cache
-      - restore_cache:
-          keys: [frontend-build]
+      # - restore_cache:
+      #     keys: [frontend-build]
       # Your job code here
       - run:
           name: Test Phase
@@ -60,8 +62,8 @@ jobs:
       # Checkout code from git
       - checkout
       # Restore from cache
-      - restore_cache:
-          keys: [frontend-build]
+      # - restore_cache:
+      #     keys: [frontend-build]
       - run:
           name: Test Phase
           command: |
