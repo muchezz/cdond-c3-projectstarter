@@ -1,11 +1,5 @@
 version: 2.1
 jobs:
-  my-name:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - run: echo Mucheru
-
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -17,6 +11,7 @@ jobs:
           name: Build front-end
           command: |
             cd frontend
+            npm i
             npm run build
             
       - save_cache:
@@ -35,6 +30,7 @@ jobs:
           name: Back-end build
           command: |
              cd backend
+             npm i
              npm run build
              
       - save_cache:
@@ -46,7 +42,7 @@ jobs:
 workflows:
   default:
     jobs:
-      - my-name
+      
       - build-frontend
       - build-backend
      
