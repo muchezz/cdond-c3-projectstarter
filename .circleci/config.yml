@@ -111,7 +111,7 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-      - slack_notify:
+      - slack_notify
           
 
 
