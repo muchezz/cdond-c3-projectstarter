@@ -69,7 +69,7 @@ jobs:
           name: Run backend Test
           command: |
             cd backend
-            npm 1
+            npm i
             npm run test
 
 
