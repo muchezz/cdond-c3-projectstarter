@@ -45,13 +45,14 @@ jobs:
       # Checkout code from git
       - checkout
       # Restore from cache
-      # - restore_cache:
-      #     keys: [frontend-build]
+      - restore_cache:
+          keys: [frontend-build]
       # Your job code here
       - run:
-          name: Test Phase
+          name: Run frontend Test
           command: |
             cd frontend
+            npm i
             npm run test
                 
   test-backend:
@@ -62,12 +63,13 @@ jobs:
       # Checkout code from git
       - checkout
       # Restore from cache
-      # - restore_cache:
-      #     keys: [frontend-build]
+      - restore_cache:
+          keys: [frontend-build]
       - run:
-          name: Test Phase
+          name: Run backend Test
           command: |
             cd backend
+            npm 1
             npm run test
 
 
