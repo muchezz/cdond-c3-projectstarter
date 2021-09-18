@@ -6,8 +6,6 @@ orbs:
 commands:
   slack_notify:
     parameters:
-      id: 
-        type: string
       channel:
         type: string
         default: $SLACK_DEFAULT_CHANNEL
