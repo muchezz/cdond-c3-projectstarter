@@ -8,8 +8,9 @@ commands:
     parameters:
       id: 
         type: string
-    channel:
-      default: $SLACK_DEFAULT_CHANNEL
+      channel:
+        type: string
+        default: $SLACK_DEFAULT_CHANNEL
     steps:
       - slack/notify:
           event: fail
