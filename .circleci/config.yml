@@ -142,28 +142,27 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              # --tags project=udapeople-backend \
-               # --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID} \
-               # --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
-               exit 1
-              
+              --tags project=udapeople-backend \
+              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
+               
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              #--tags project=udapeople-frontend \
-               #--stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID} \
-               #--parameter-overrides ID=${CIRCLE_WORKFLOW_ID}  
+              --tags project=udapeople-frontend \
+              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:6}  
               
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             echo "[all]" > inventory
             aws ec2 describe-instances \
-            #--query 'Reservations[*].Instances[*].PublicIpAddress' \
-              #--filters "Name=tag:project,Values=udapeople-backend" \
-              #--output text >> inventory
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend" \
+              --output text >> inventory
             
       - persist_to_workspace:
           root: ~/
