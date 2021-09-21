@@ -134,7 +134,7 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      - image: amazon/aws-cli
+      # Docker image here that supports AWS CLI
     steps:
       - checkout
       - run:
@@ -143,8 +143,10 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople-backend \
-              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
+              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
+
+              - slack_notify
                
       - run:
           name: Ensure front-end infrastructure exist
