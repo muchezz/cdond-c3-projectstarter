@@ -1,9 +1,9 @@
 version: 2.1
 
-slack-fail-post-step:
-    post-steps: 
-     - slack/status:
-        fail_only: true
+# slack-fail-post-step:
+#     post-steps: 
+#      - slack/status:
+#         fail_only: true
 
 orbs:
   slack: circleci/slack@4.4.4
@@ -70,11 +70,11 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-      - post-steps:
-        - slack/notify:
-            channel: C02F9FY9QF3
-            event: fail
-            template: basic_fail_1
+      # - post-steps:
+      #   - slack/notify:
+      #       channel: C02F9FY9QF3
+      #       event: fail
+      #       template: basic_fail_1
           
 
 
@@ -241,10 +241,10 @@ jobs:
       # Here's where you will add some code to rollback on failure      
 
 
-      - slack/notify:
-          channel: C02F9FY9QF3
-          event: fail
-          template: basic_fail_1
+      # - slack/notify:
+      #     channel: C02F9FY9QF3
+      #     event: fail
+      #     template: basic_fail_1
 
 
 workflows:
