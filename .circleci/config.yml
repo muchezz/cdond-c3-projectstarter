@@ -142,8 +142,9 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
               --region=us-east-1
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
+              
 
               
                
@@ -154,8 +155,9 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
+              --region=us-east-1 
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:6}  
-              --region=$us-east-1
+              
 
               
       - run:
