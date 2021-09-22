@@ -1,11 +1,17 @@
 version: 2.1
 
+slack-fail-post-step:
+    post-steps: 
+     - slack/status:
+        fail_only: true
+
 orbs:
   slack: circleci/slack@4.4.4
   aws-cli: circleci/aws-cli@2.0.3
 
 commands:
-    
+   
+  
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -64,10 +70,11 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-      - slack/notify:
-          channel: C02F9FY9QF3
-          event: fail
-          template: basic_fail_1
+      - post-steps:
+        - slack/notify:
+            channel: C02F9FY9QF3
+            event: fail
+            template: basic_fail_1
           
 
 
