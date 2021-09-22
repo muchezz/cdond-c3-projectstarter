@@ -181,6 +181,12 @@ jobs:
       # Here's where you will add some code to rollback on failure      
 
 
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+
+
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
@@ -222,6 +228,12 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
             
       # Here's where you will add some code to rollback on failure      
+
+
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
 
 workflows:
