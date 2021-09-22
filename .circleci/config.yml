@@ -5,16 +5,7 @@ orbs:
   aws-cli: circleci/aws-cli@2.0.3
 
 commands:
-  slack_notify:
-    parameters:
-      channel:
-        type: string
-        default: $SLACK_DEFAULT_CHANNEL
-    steps:
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-
+    
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -48,7 +39,10 @@ jobs:
           paths: [frontend/node_modules]
           key: frontend-build
           
-      - slack_notify
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
           
 
 
@@ -70,7 +64,10 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-      - slack_notify
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
           
 
 
@@ -137,12 +134,13 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run: yum -y install tar gzip 
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=udapeople-backend \
+              --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
 
@@ -153,23 +151,76 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople-frontend \
+              --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:6}  
               
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            echo "[all]" > inventory
+            echo "[all]" > .circleci/ansible/inventory.txt
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:project,Values=udapeople-backend" \
-              --output text >> inventory
-            
+              --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:6}" \
+              --output text >> .circleci/ansible/inventory.txt
+
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request PUT \
+              --data `aws ec2 describe-instances \
+                --query 'Reservations[*].Instances[*].PublicIpAddress' \
+                --filters "Name=tag:project,Values=udapeople-${CIRCLE_WORKFLOW_ID:0:6}" \
+                --output text` \
+              https://api.memstash.io/values/UdapeopleDns
+              echo URL: https://api.memstash.io/values/UdapeopleDns
+              echo Token: ${CIRCLE_WORKFLOW_ID}
+      
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+      # Here's where you will add some code to rollback on failure      
+
+
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: [1c:e1:51:09:8e:8f:13:47:16:be:83:8c:c0:88:f8:fd]
+      - attach_workspace:
+           at: ~/
+
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+            apk add --update tar gzip ansible nodejs npm curl
+            pip install awscli
+            
+      - run:
+          name: Configure server
+          no_output_timeout: 25m
+          command: |
+            cd .circleci/ansible
+            echo "Inventory content"
+            cat inventory.txt
+            
+
+            echo ENVIRONMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+
+            ansible-playbook -i inventory.txt configure-server.yml
+            
       # Here's where you will add some code to rollback on failure      
 
 
@@ -192,5 +243,10 @@ workflows:
         
       - deploy-infrastructure:
            requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+           filters:
+             branches:
+               only: [master]
+      - configure-infrastructure:
+           requires: [deploy-infrastructure]
 
      

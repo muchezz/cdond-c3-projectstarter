@@ -5,7 +5,7 @@ Parameters:
   ID:
     Description: Unique identifier.
     Type: String
-    Default: u8iej4uaww
+    
 
 Resources:
   InstanceSecurityGroup:
