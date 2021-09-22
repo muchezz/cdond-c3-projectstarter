@@ -40,7 +40,7 @@ jobs:
           key: frontend-build
           
       - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
+          channel: C02F9FY9QF3
           event: fail
           template: basic_fail_1
           
@@ -65,7 +65,7 @@ jobs:
           key: backend-build
 
       - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
+          channel: C02F9FY9QF3
           event: fail
           template: basic_fail_1
           
@@ -143,6 +143,7 @@ jobs:
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
+              ----region=${AWS_DEFAULT_REGION}
 
               
                
@@ -154,6 +155,8 @@ jobs:
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:6}  
+              --region=${AWS_DEFAULT_REGION}
+
               
       - run:
           name: Add back-end ip to ansible inventory
@@ -182,7 +185,7 @@ jobs:
 
 
       - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
+          channel: C02F9FY9QF3
           event: fail
           template: basic_fail_1
 
@@ -231,7 +234,7 @@ jobs:
 
 
       - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
+          channel: C02F9FY9QF3
           event: fail
           template: basic_fail_1
 
