@@ -255,18 +255,21 @@ jobs:
             sudo npm run migrations > migration.txt
             
 
-            status=$(cat migration.txt | grep -c "has been executed successfully")
-            if [ $status > 0 ]; then exit 0; else exit 1; fi;
+            # status=$(cat migration.txt | grep -c "has been executed successfully")
+            # if [ $status > 0 ]; then exit 0; else exit 1; fi;
       - run:
           name: Send migration results to memstash
           command: |
             cat migration.txt
-            
-            curl -H "Content-Type: text/plain" \
-              -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
-              --request PUT --data "1" \
-              https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
-            
+            if  [grep -c "has been executed successfully" migration.txt > 0 ]
+            then
+              curl -H "Content-Type: text/plain" \
+                -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
+                --request PUT --data "1" \
+                https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
+            else
+              exit 1
+            fi
      # Here's where you will add some code to rollback on failure      
 
 
