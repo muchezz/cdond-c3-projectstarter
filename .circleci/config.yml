@@ -240,11 +240,94 @@ jobs:
             
       # Here's where you will add some code to rollback on failure      
 
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            # sudo npm install
+            # npm audit fix --audit-level=critical --force
+            # sudo npm run build
+            sudo npm run migrations > migration.txt
+            
+
+            status=$(cat migration.txt | grep -c "has been executed successfully")
+            if [ $status > 0 ]; then exit 0; else exit 1; fi;
+      - run:
+          name: Send migration results to memstash
+          command: |
+            curl -H "Content-Type: text/plain" \
+              -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
+              --request PUT --data "1" \
+              https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
+     # Here's where you will add some code to rollback on failure      
+
 
       # - slack/notify:
       #     channel: C02F9FY9QF3
       #     event: fail
       #     template: basic_fail_1
+
+  deploy-frontend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+            apk add --update tar gzip ansible nodejs npm curl
+            pip install awscli
+      - run:
+          name: Get backend url
+          command: |
+            BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request GET https://api.memstash.io/values/UdapeopleDns)
+            export API_URL="http://${BACKEND_IP}:3030" 
+
+            echo ENVIRONMENT=production > "frontend/.env"
+            echo NODE_ENV=production >> "frontend/.env"
+            echo API_URL=$API_URL >> "frontend/.env"
+
+            echo "${API_URL}"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm run build
+            aws s3 cp dist s3://udapeople-prod-${CIRCLE_WORKFLOW_ID:0:6} --recursive
+      
+
+      # Here's where you will add some code to rollback on failure      
+
+  deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: [1c:e1:51:09:8e:8f:13:47:16:be:83:8c:c0:88:f8:fd]
+      - attach_workspace:
+           at: ~/
+
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip ansible nodejs npm curl openssh-client
+            pip install awscli
+      - run:
+          name: Deploy backend
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+      # Here's where you will add some code to rollback on failure  
 
 
 workflows:
@@ -271,5 +354,13 @@ workflows:
                only: [master]
       - configure-infrastructure:
            requires: [deploy-infrastructure]
+
+      - run-migrations:
+          requires: [configure-infrastructure]
+
+      - deploy-frontend:
+           requires: [run-migrations]
+      - deploy-backend:
+           requires: [run-migrations]
 
      
