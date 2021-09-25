@@ -249,18 +249,14 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            npm cache clean --force
-            npm install
-            # npm audit fix --audit-level=critical --force
-            # sudo npm run build
-            sudo npm run migrations > migration.txt
+            npm run migrations >> migration_output.txt
+            cat migration_output.txt
             
-
-            # status=$(cat migration.txt | grep -c "has been executed successfully")
-            # if [ $status > 0 ]; then exit 0; else exit 1; fi;
+           
       - run:
           name: Send migration results to memstash
           command: |
+            cd backend
             cat migration.txt
             if  [grep -c "has been executed successfully" migration.txt > 0 ]
             then
