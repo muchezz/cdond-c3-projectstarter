@@ -238,6 +238,7 @@ jobs:
            at: ~/
       - run:
           name: Run migrations
+          no_output_timeout: 25m
           command: |
             cd backend
             npm run migrations >> migration_output.txt
