@@ -238,16 +238,23 @@ jobs:
             cd backend
             npm install
             
-            echo ENVIROMENT=$ENVIROMENT >> ./.env
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ./.env
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> ./.env
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> ./.env
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> ./.env
-            echo TYPEORM_HOST=$TYPEORM_HOST >> ./.env
-            echo TYPEORM_PORT=$TYPEORM_PORT >> ./.env
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ./.env
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ./.env
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ./.env
+      - run:
+          name: Run migrations
+          command: |
+
+            cd ./backend 
+            touch .env    
+            echo ENVIRONMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
             npm run migrations >> migration_output.txt
             cat migration_output.txt
@@ -336,13 +343,11 @@ jobs:
 workflows:
   default:
     jobs:
-      
       - build-frontend
       - test-frontend:
           requires: [build-frontend]
       - scan-frontend:
           requires: [build-frontend] 
-
 
       - build-backend
       - test-backend:
