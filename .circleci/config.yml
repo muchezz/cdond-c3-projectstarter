@@ -242,8 +242,8 @@ jobs:
           name: Run migrations
           command: |
 
-            cd backend 
-            #touch .env    
+            
+            touch backend/.env   
             echo ENVIRONMENT=production > "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
@@ -255,7 +255,8 @@ jobs:
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
-
+            
+            cd backend 
             npm run migrations >> migration_output.txt
             cat migration_output.txt
       
