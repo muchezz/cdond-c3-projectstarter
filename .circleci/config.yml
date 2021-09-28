@@ -257,7 +257,7 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             
             cd backend 
-            touch migration_output.txt
+           
             npm run migrations >> migration_output.txt
             cat migration_output.txt
       
@@ -266,7 +266,7 @@ jobs:
           name: Send migration results to memstash
           command: |
             cd backend
-            cat migration.txt
+            cat migration_output.txt
             if  [grep -c "has been executed successfully" migration.txt > 0 ]
             then
               curl -H "Content-Type: text/plain" \
