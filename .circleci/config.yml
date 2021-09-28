@@ -370,11 +370,12 @@ jobs:
           command: |
             BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request GET https://api.memstash.io/values/UdapeopleDns)
-            export API_URL="http://${BACKEND_IP}:3030"
+            export BACKEND_STATUS="http://${BACKEND_IP}:3030/api/status"
       - run:
           name: Backend smoke test.
           command: |
-            curl -s "http://${BACKEND_IP}:3030/api/status"
+            echo "${BACKEND_STATUS}"
+            curl -s ${BACKEND_STATUS}
       - run:
           name: Frontend smoke test.
           command: |
