@@ -25,13 +25,13 @@
     state: latest
     update_cache: yes
 
-- name: "install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
+# - name: "install pm2"
+#   become: true
+#   npm:
+#     name: pm2
+#     global: yes
+#     production: yes
+#     state: present
 
 - name: Copy backend dist files web server
   copy:
@@ -41,6 +41,8 @@
 - name: Install Node
   shell: |
     cd /home/ubuntu/backend
+    sudo npm install -g npm@latest
+    sudo npm install -g webpack-dev-server
     npm install
 - name: Build Node
   shell: |
