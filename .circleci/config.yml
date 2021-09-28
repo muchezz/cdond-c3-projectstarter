@@ -257,7 +257,7 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             
             cd backend 
-            
+            npm run migrations:revert
             npm run migrations >> migration_output.txt
             cat migration_output.txt
       
@@ -279,15 +279,15 @@ jobs:
             --data "0" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
             fi
 
-            if  [grep -c "has been executed successfully" migration.txt > 0 ]
-            then
-              curl -H "Content-Type: text/plain" \
-                -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
-                --request PUT --data "1" \
-                https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
-            else
-              exit 1
-            fi
+            # if  [grep -c "has been executed successfully" migration.txt > 0 ]
+            # then
+            #   curl -H "Content-Type: text/plain" \
+            #     -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
+            #     --request PUT --data "1" \
+            #     https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
+            # else
+            #   exit 1
+            # fi
      # Here's where you will add some code to rollback on failure      
 
 
