@@ -257,6 +257,7 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             
             cd backend 
+            touch migration_output.txt
             npm run migrations >> migration_output.txt
             cat migration_output.txt
       
