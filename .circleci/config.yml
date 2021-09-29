@@ -16,18 +16,10 @@ commands:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     steps:
       - run:
-          name: Install AWS CLI
-          when: on_fail
-          command: |
-            if ! [ -x "$(command -v aws)" ]; then
-            pip install awscli
-            else
-            echo "AWS CLI already installed"
-      - run:
           name: Destroy environments
           when: on_fail
           command: |
-            
+            pip install awscli
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6}
             aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:6} --recursive
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6}
@@ -41,9 +33,10 @@ commands:
           command: |
             migrationStatus=$(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
             --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6})          
+            
             if [[ $migrationStatus==1 ]]
             then
-              cd backend
+              cd ~/backend
               npm install
               npm run migrations:revert
             fi
