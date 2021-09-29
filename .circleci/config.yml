@@ -10,7 +10,13 @@ orbs:
   aws-cli: circleci/aws-cli@2.0.3
 
 commands:
-   
+  commands:
+    notify_on_slack:
+    steps:
+      - slack/notify:
+          event: fail
+          channel: C02F9FY9QF3
+          template: basic_fail_1
   
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -33,8 +39,8 @@ commands:
           command: |
             migrationStatus= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
             --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6})          
-
-            if (( migrationStatus==1 ))
+            echo $migrationStatus
+            if (($migrationStatus==1))
             then
               cd backend
               npm install
@@ -61,11 +67,7 @@ jobs:
           paths: [frontend/node_modules]
           key: frontend-build
           
-      - slack/notify:
-          channel: C02F9FY9QF3
-          event: fail
-          template: basic_fail_1
-          
+      #- notify_on_slack
 
 
   build-backend:
@@ -86,11 +88,7 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-      # - post-steps:
-      #   - slack/notify:
-      #       channel: C02F9FY9QF3
-      #       event: fail
-      #       template: basic_fail_1
+      
           
 
 
@@ -210,12 +208,6 @@ jobs:
       - destroy-environment
 
 
-      # - slack/notify:
-      #     channel: C02F9FY9QF3
-      #     event: fail
-      #     template: basic_fail_1
-
-
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
@@ -311,10 +303,7 @@ jobs:
       - destroy-environment
 
 
-      # - slack/notify:
-      #     channel: C02F9FY9QF3
-      #     event: fail
-      #     template: basic_fail_1
+      
 
   deploy-frontend:
     docker:
@@ -398,6 +387,7 @@ jobs:
             else
               return 1
             fi
+            sleep 20
       - run:
           name: Get backend url / Backend smoke test.
           command: |
@@ -409,7 +399,7 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            
+            echo ${BACKEND_STATUS}
             curl -s "${BACKEND_STATUS}"
      
       - revert-migrations
