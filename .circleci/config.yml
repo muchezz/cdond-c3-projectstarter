@@ -366,17 +366,18 @@ jobs:
           command: |
             apk add --update curl
       - run:
-          name: Get backend url
+          name: Get backend url / Backend smoke test.
           command: |
             BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request GET https://api.memstash.io/values/UdapeopleDns)
             export BACKEND_STATUS="http://${BACKEND_IP}:3030/api/status"
             echo ${BACKEND_STATUS}
-      - run:
-          name: Backend smoke test.
-          command: |
-            
             curl -s "${BACKEND_STATUS}"
+      # - run:
+      #     name: Backend smoke test.
+      #     command: |
+            
+      #       curl -s "${BACKEND_STATUS}"
       - run:
           name: Frontend smoke test.
           command: |
