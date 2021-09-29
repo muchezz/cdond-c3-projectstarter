@@ -44,10 +44,12 @@
     sudo npm install -g npm@latest
     sudo npm install -g webpack-dev-server
     npm install
+
 - name: Build Node
   shell: |
     cd /home/ubuntu/backend
     npm run build
+    
 - name: Start PM2
   shell: |
     cd /home/ubuntu/backend
