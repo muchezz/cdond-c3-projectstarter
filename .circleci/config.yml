@@ -47,7 +47,7 @@ commands:
           when: on_fail
           command: |
             migration_status= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}) 
-            if(( migration_status==1 )); 
+            if(( $migration_status==1 )); 
               then
                 cd backend
                 npm install
@@ -248,6 +248,7 @@ jobs:
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+            cat backend/.env
 
             cd .circleci/ansible
             cat inventory.txt
@@ -265,31 +266,7 @@ jobs:
           keys: [backend-build]
       - attach_workspace:
           at: ~/
-      # - run:
-      #     name: awscli install
-      #     command: |
-      #       sudo apt-get -y -qq update
-      #       sudo apt-get -y -qq install python3
-      #       sudo apt-get -qq install awscli
-      #       pwd
-      #       ls -la
-      # - run:
-      #     name: add values to .env files # Create a `backend/.env` file and add those values there dynamically
-      #     command: |
-      #       echo PWD
-      #       pwd
-      #       #ls -la
-      #       touch backend/.env
-      #       echo ENVIRONMENT=production >> "backend/.env"
-      #       echo TYPEORM_CONNECTION=postgres >> "backend/.env"
-      #       echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
-      #       echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
-      #       echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
-      #       echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-      #       echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-      #       echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-      #       echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-      #       echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+     
             
       - run:
           name: Run migrations
@@ -382,6 +359,22 @@ jobs:
           name: Deploy backend
           no_output_timeout: 30m
           command: |
+      
+            echo ENVIRONMENT=production >> "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+            cat "backend/.env
+
+            tar -C backend -czvf artifact.tar.gz .
+            ls -la
+
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
