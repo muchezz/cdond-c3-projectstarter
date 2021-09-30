@@ -21,13 +21,15 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     steps:
+      - attach_workspace:
+           at: ~/
       - run:
           name: Destroy environments
           when: on_fail
           command: |
             
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6}
-            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:6} --recursive
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:6} --force
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6}
 
   revert-migrations:
@@ -37,10 +39,8 @@ commands:
           name: Revert database migrations
           when: on_fail
           command: |
-            migrationStatus= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
-            --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6})          
-            echo $migrationStatus
-            if (($migrationStatus==1))
+            migration_status= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}) 
+            if ((migration_tatus==true ));
             then
               cd backend
               npm install
@@ -278,7 +278,6 @@ jobs:
           command: |
             
             cd backend
-            cat migration_output.txt
             if grep -q "has been executed successfully." migration_output.txt
             then
             curl -H "Content-Type: text/plain" -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
@@ -372,6 +371,8 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -395,12 +396,8 @@ jobs:
               --request GET https://api.memstash.io/values/UdapeopleDns)
             export BACKEND_STATUS="http://${BACKEND_IP}:3030/api/status"
             echo ${BACKEND_STATUS}
-            
-      - run:
-          name: Backend smoke test.
-          command: |
-            echo ${BACKEND_STATUS}
-            curl -s "${BACKEND_STATUS}"
+            curl "http://${BACKEND_IP}:3030/api/status"
+      
      
       - revert-migrations
       - destroy-environment
