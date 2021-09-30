@@ -37,7 +37,7 @@ commands:
             
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} --region=$AWS_REGION
             aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:6} --force --region=$AWS_REGION
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} --region=$AWS_REGION
+            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} --region=$AWS_REGION
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow. 
@@ -47,7 +47,7 @@ commands:
           when: on_fail
           command: |
             migration_status= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}) 
-            if [$migration_status=="1"]
+            if [migration_status==1]
             then 
                 cd backend
                 npm install
@@ -247,7 +247,17 @@ jobs:
           name: Configure server
           
           command: |
-            
+            echo ENVIRONMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
             cd .circleci/ansible
             cat inventory.txt
