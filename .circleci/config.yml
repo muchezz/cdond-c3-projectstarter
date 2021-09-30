@@ -393,17 +393,7 @@ jobs:
           command: |
             apk add --update tar gzip curl nodejs npm
             pip install awscli
-      - run:
-          name: Frontend smoke test.
-          command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:6}.s3-website-us-east-1.amazonaws.com"
-            if curl -s ${URL} | grep "Welcome"
-            then
-              return 0
-            else
-              return 1
-            fi
-            sleep 20
+
       - run:
           name: Get backend url / Backend smoke test.
           command: |
@@ -412,8 +402,19 @@ jobs:
             export BACKEND_STATUS="http://${BACKEND_IP}:3030/api/status"
             echo ${BACKEND_STATUS}
             curl "http://${BACKEND_IP}:3030/api/status"
+
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:6}.s3-website-us-east-1.amazonaws.com"
+            if curl -s ${URL} | grep "Welcome"
+            then
+              return 1
+            else
+              return 0
+            fi
+            sleep 20
       
-     
       - revert-migrations
       - destroy-environment
 
