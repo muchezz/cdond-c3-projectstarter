@@ -38,3 +38,10 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub backend-${ID}
+
+  Outputs:
+  PublicDnsName:
+    Description: Server Public DNS Name
+    Value: !GetAtt EC2Instance.PublicDnsName
+    Export:
+      Name: !Sub "${AWS::StackName}-BackendPublicDnsName"
