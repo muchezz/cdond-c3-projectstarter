@@ -47,11 +47,13 @@ commands:
           when: on_fail
           command: |
             migration_status= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}) 
-            if ((migration_status==true ));
-            then
-              cd backend
-              npm install
-              npm run migrations:revert
+            if [$success_migration=="1"]
+            then 
+                cd backend
+                npm install
+                npm run migration:revert
+            else 
+                echo "Do nothing" 
             fi
           
 
@@ -234,10 +236,20 @@ jobs:
             
       - run:
           name: Configure server
-          no_output_timeout: 25m
+          
           command: |
-            pwd &&
-            ls -la
+            echo ENVIRONMENT=production > "backend/.env"
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=production >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
@@ -259,28 +271,11 @@ jobs:
       - run:
           name: Run migrations
           command: |
-
-            
-            touch backend/.env   
-            echo ENVIRONMENT=production > "backend/.env"
-            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
-            echo NODE_ENV=production >> "backend/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
-            
             cd backend 
             npm run migrations:revert
             npm run migrations >> migration_output.txt
             cat migration_output.txt
-            cd .env
-            ls -la 
-      
+            
            
       - run:
           name: Send migration results to memstash
@@ -298,15 +293,6 @@ jobs:
             --data "0" https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
             fi
 
-            # if  [grep -c "has been executed successfully" migration.txt > 0 ]
-            # then
-            #   curl -H "Content-Type: text/plain" \
-            #     -H "token: migration-${CIRCLE_WORKFLOW_ID}" \
-            #     --request PUT --data "1" \
-            #     https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}
-            # else
-            #   exit 1
-            # fi
       - revert-migrations
       - destroy-environment
 
