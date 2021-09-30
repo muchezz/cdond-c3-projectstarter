@@ -21,16 +21,23 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     steps:
-      - attach_workspace:
-           at: ~/
+      - run:
+          name: Install AWS CLI if not Exist
+          when: on_fail
+          command: |
+            if ! [ -x "$(command -v aws)" ]; then
+            pip install awscli
+            else
+            echo "AWS CLI already installed"
+            fi
       - run:
           name: Destroy environments
           when: on_fail
           command: |
             
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6}
+            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} 
             aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:6} --force
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6}
+            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} 
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow. 
@@ -40,7 +47,7 @@ commands:
           when: on_fail
           command: |
             migration_status= $(curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6}) 
-            if ((migration_tatus==true ));
+            if ((migration_status==true ));
             then
               cd backend
               npm install
@@ -271,6 +278,8 @@ jobs:
             npm run migrations:revert
             npm run migrations >> migration_output.txt
             cat migration_output.txt
+            cd .env
+            ls -la 
       
            
       - run:
