@@ -171,7 +171,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:6} \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}"  
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:6}"  
               
 
               
@@ -183,7 +183,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6} \
               --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:6} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:6}  
+              --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:6}  
               
 
               
@@ -435,7 +435,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
               --stack-name "udapeople-cloudfront" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:6}" \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:6}" \
               --tags project=udapeople-${CIRCLE_WORKFLOW_ID:0:6}
 
       - revert-migrations
@@ -462,11 +462,14 @@ jobs:
       - run:
           name: Remove old stacks and files
           command: |
+            echo ${STACKS[@]}
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               aws cloudformation delete-stack --stack-name udapeople-backend-${OldWorkflowID}
-              aws s3 rm s3://udapeople-${OldWorkflowID} --recursive
+              aws s3 rm s3://udapeople-${OldWorkflowID} --recursive  --region=$AWS_REGION
               aws cloudformation delete-stack --stack-name udapeople-frontend-${OldWorkflowID}
+            else
+              echo "fresh Stacks"
             fi
 
      
@@ -490,6 +493,7 @@ workflows:
            filters:
              branches:
                only: [master]
+
       - configure-infrastructure:
            requires: [deploy-infrastructure]
 

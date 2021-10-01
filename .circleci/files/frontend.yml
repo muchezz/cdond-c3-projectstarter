@@ -2,7 +2,7 @@ Description: >
   UdaPeople frontend stack.
 
 Parameters:
-  ID:
+  WorkflowID:
     Description: Unique identifier.
     Type: String
     Default: ${CIRCLE_WORKFLOW_ID:0:6}
@@ -11,7 +11,7 @@ Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "udapeople-${ID}"
+      BucketName: !Sub "udapeople-${WorkflowID}"
       AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html

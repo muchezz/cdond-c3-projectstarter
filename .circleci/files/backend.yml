@@ -2,7 +2,7 @@ Description: >
   UdaPeople backend stack.
 
 Parameters:
-  ID:
+  WorkflowID:
     Description: Unique identifier.
     Type: String
     Default: ${CIRCLE_WORKFLOW_ID:0:6}
@@ -12,7 +12,7 @@ Resources:
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub UdaPeople-${ID}
+      GroupName: !Sub UdaPeople-${WorkflowID}
       GroupDescription: Allow port 22 and port 3030.
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -37,11 +37,11 @@ Resources:
       ImageId: ami-0f387434d1dfc4cc2
       Tags:
         - Key: Name
-          Value: !Sub backend-${ID}
+          Value: !Sub backend-${WorkflowID}
 
-  # Outputs:
-  # PublicDnsName:
-  #   Description: Server Public DNS Name
-  #   Value: !GetAtt EC2Instance.PublicDnsName
-  #   Export:
-  #     Name: !Sub "${AWS::StackName}-BackendPublicDnsName"
+Outputs:
+  PublicDnsName:
+    Description: Server Public DNS Name
+    Value: !GetAtt EC2Instance.PublicDnsName
+    Export:
+      Name: !Sub "${AWS::StackName}-BackendPublicDnsName"
