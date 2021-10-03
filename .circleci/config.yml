@@ -48,7 +48,7 @@ commands:
           when: on_fail
           command: |
             migration_status= curl -H "token: migration-${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration-${CIRCLE_WORKFLOW_ID:0:6} 
-            if(( $migration_status==1 )); 
+            if(( $migration_status== 1 )); 
               then
                 cd backend
                 npm install
