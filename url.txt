@@ -1,2 +1,0 @@
-https://github.com/Muchezz/cdond-c3-projectstarter
-udapeople-prod.clcfygtcyofu.us-east-1.rds.amazonaws.com
