@@ -73,12 +73,6 @@
     dest: /root
     force: no
 
-# - name: Install Node
-#   shell: |
-#     cd /home/ubuntu/backend
-#     sudo npm install -g npm@latest
-#     sudo npm install -g webpack-dev-server
-#     npm install 
     
 - name: "install npm packages"
   become: true

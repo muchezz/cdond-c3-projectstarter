@@ -1,6 +1,7 @@
 ## Give your Application Auto-Deploy Superpowers
 
 [![<ORG_NAME>](https://circleci.com/gh/Muchezz/cdond-c3-projectstarter.svg?style=svg)](https://app.circleci.com/pipelines/github/Muchezz/cdond-c3-projectstarter)
+[![<ORG_NAME>](https://circleci.com/gh/Muchezz/cdond-c3-projectstarter.svg?style=svg)](https://app.circleci.com/pipelines/github/Muchezz/cdond-c3-projectstarter)
 
 
 In this project, you will prove your mastery of the following learning objectives:
